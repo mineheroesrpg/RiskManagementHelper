@@ -1,0 +1,267 @@
+/* App container */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Középre igazítás vízszintesen */
+    justify-content: center; /* Középre igazítás függőlegesen */
+    padding: 24px;
+    max-width: 768px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: #d9d9d9;
+    text-align: center; /* Szöveg középre igazítása */
+  }
+  
+  /* Title */
+  .app-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    color: #2e2e2e;
+  }
+  
+  /* Strategy selection */
+  .strategy-label {
+    margin-bottom: 8px;
+    color: #2e2e2e;
+  }
+  
+  .strategy-select-trigger {
+    background-color: #898c96;
+    border: 1px solid #2e2e2e;
+    color: white;
+    width: 100%; /* Szélesség igazítása */
+    max-width: 300px; /* Maximális szélesség */
+  }
+  
+  .strategy-select-content {
+    position: absolute; /* A menü pozíciója */
+    top: 100%; /* A trigger alatt jelenjen meg */
+    left: 0;
+    width: 100%; /* Igazodjon a trigger szélességéhez */
+    max-height: 200px; /* Maximális magasság görgetéshez */
+    overflow-y: auto; /* Görgetés engedélyezése */
+    background-color: #898c96; /* Háttérszín */
+    color: white; /* Szövegszín */
+    border: 1px solid #2e2e2e; /* Szegély */
+    border-radius: 4px; /* Lekerekített sarkok */
+    z-index: 9999; /* Nagy z-index az előtérbe helyezéshez */
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto;
+  }
+  
+  .strategy-select-item:hover {
+    background-color: #728acc;
+  }
+  
+  /* Strategy card */
+  .strategy-card {
+    margin: 24px 0;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Szélesség igazítása */
+    max-width: 500px; /* Maximális szélesség */
+  }
+  
+  /* Input container */
+  .input-container {
+    margin-bottom: 24px;
+    width: 100%; /* Szélesség igazítása */
+    max-width: 500px; /* Maximális szélesség */
+  }
+  
+  .input-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column; /* Elemek egymás alá helyezése */
+    align-items: center; /* Középre igazítás */
+  }
+  
+  .input-label {
+    margin-bottom: 4px;
+    color: #2e2e2e;
+  }
+  
+  .input-field {
+    width: 100%;
+    max-width: 300px; /* Maximális szélesség */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  /* Info card */
+  .info-card {
+    position: relative;
+    margin: 24px 0;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Szélesség igazítása */
+    max-width: 500px; /* Maximális szélesség */
+    text-align: center; /* Szöveg középre igazítása */
+    border: 1px solid #080808;
+    border-radius: 8px;
+  }
+  
+  .info-card p {
+    margin: 8px 0;
+  }
+
+/* Container for the visualization */
+.position-visualization {
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #d9d9d9;
+  width: 100%; /* Szélesség igazítása */
+  max-width: 500px; /* Maximális szélesség */
+  text-align: center; /* Szöveg középre igazítása */
+  height: 400px; /* Fix magasság beállítása */
+  overflow: visible; /* Biztosítja, hogy a tartalom ne lógjon ki */
+}
+  
+  /* Target label */
+  .target-label {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #d4f4d2;
+    color: #2e7d32;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 2; /* Előtérbe helyezés */
+  }
+  
+  /* Partial line */
+  .partial-line {
+    position: absolute;
+    top: 32%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: #728acc;
+    width: 80%; /* A vonal szélessége */
+    border-top: 2px solid #728acc; /* A vonal megjelenítése */
+    text-align: center;
+    justify-content: center;
+    z-index: 4; /* Előtérbe helyezés */
+    animation: blinkLine 1s linear infinite; /* Animáció hozzáadása */
+  }
+  
+  .partial-text {
+    position: absolute;
+    top: -20px; /* A szöveg elhelyezése a vonal fölött */
+    background-color: #d4f4d2;
+    padding: 2px 5px;
+    font-size: 10px;
+    color: #1976d2;
+    z-index: 4; /* Előtérbe helyezés */
+  }
+  
+  /* Profit bar */
+  .profit-bar {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: bottom; /* Az animáció az alsó élről indul */
+    width: 200px;
+    background-color: #d4f4d2;
+    border-radius: 4px;
+    z-index: 3;
+    overflow: hidden; /* Biztosítja, hogy a tartalom ne lógjon ki */
+    animation: growProfitBar 1s ease-out forwards; /* Animáció hozzáadása */
+  }
+  
+  /* Info bar */
+  .info-bar {
+    position: absolute;
+    bottom: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    text-align: center;
+    color: #2e2e2e;
+    width: 210px;
+    height: 10%;
+    background-color: #728acc;
+    z-index: 2; /* Előtérbe helyezés */
+  }
+  
+  /* Loss bar */
+  .loss-bar {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 30%;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    z-index: 1; /* Háttérbe helyezés */
+    animation: growLossBar 1s ease-out forwards; /* Animáció hozzáadása */
+  }
+  
+  /* Stop label */
+  .stop-label {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f8d7da;
+    color: #a71d2a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 2; /* Előtérbe helyezés */
+  }
+
+
+/* Loss bar animáció */
+@keyframes growLossBar {
+    from {
+      height: 0;
+    }
+    to {
+      height: 30%; /* Végső magasság */
+    }
+  }
+
+/* Target label animáció */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(+100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+/* Profit bar animáció */
+@keyframes growProfitBar {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--profit-bar-height, 40%); /* Dinamikus magasság változóval */
+    }
+  }
+
+@keyframes blinkLine {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
