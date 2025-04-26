@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "./components/ui/card";
 import { Input } from "./components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "./components/ui/select";
 import { Label } from "./components/ui/label";
 import { motion } from "framer-motion";
+import Select from "react-select";
+
 
 import './styles.css';
 
@@ -16,6 +17,12 @@ Phase 2: Increase risk to 0.5% per trade. At 1R, take 50% of the position off an
 
 Pro Tip: If after the first partial there's still at least 2 contracts left, consider closing one at 2R and letting the last one run for maximum profit.`,
     inputs: ["accountSize", "currentPnL", "targetProfit"],
+  },
+  Expert: {
+    name: "Expert mode",
+    description: `This a free playground. Input your account size, and how much you want to risk. The calculator will do the rest.
+Pro Tip: If you are not sure about the risk, use the "Safe Start" strategy to get a better idea of how much you should risk.`,
+    inputs: ["accountSize", "riskPercent", "targetRR"],
   },
 };
 
@@ -49,6 +56,8 @@ export default function RiskManagementApp() {
   M6B: 6250,    // Micro British Pound Futures: $6,250 per point (tick size: 0.0001, $0.625 per tick)
   M6C: 10000,   // Micro Canadian Dollar Futures: $10,000 per point (tick size: 0.0001, $1 per tick)
   M6E: 12500,   // Micro Euro Futures: $12,500 per point (tick size: 0.0001, $1.25 per tick)
+  BT: 5,        // Bitcoin Futures: $5 per point
+  MBT: 0.1,     // Micro Bitcoin Futures: $0.1 per point
   };
 
   const currentStrategy = strategies[selectedStrategy];
@@ -85,28 +94,52 @@ export default function RiskManagementApp() {
   };
 
   const calculateContracts = () => {
-    const { stopSize, asset, currentPnL, accountSize, targetProfit } = inputs;
+    const { stopSize, asset, currentPnL, accountSize, targetProfit, riskPercent } = inputs;
     const account = parseFloat(accountSize);
     const stop = parseFloat(stopSize);
     const pnl = parseFloat(currentPnL);
     const target = parseFloat(targetProfit);
     const valuePerPoint = contractValuePerPoint[asset] || 2;
-
-    const phase = pnl >= target / 3 ? 2 : 1;
-    const riskPercent = phase === 2 ? 0.005 : 0.0025;
-    const riskAmount = account * riskPercent;
-    const contracts = Math.floor(riskAmount / (stop * valuePerPoint));
-
+  
+    const phase = selectedStrategy === "Expert" ? null : pnl >= target / 3 ? 2 : 1;
+    const riskPercentValue =
+      selectedStrategy === "Expert"
+        ? parseFloat(riskPercent || 0) / 100 // Ha nincs megadva riskPercent, alapértelmezettként 0-t használunk
+        : phase === 2
+        ? 0.005
+        : 0.0025;
+  
+    const riskAmount = account * riskPercentValue; // Az összes kockázat az egész számlára
+    const contracts = Math.floor(riskAmount / (stop * valuePerPoint)); // A stop loss méretével osztjuk el
+  
     return { contracts, riskAmount, phase, stop, valuePerPoint, account };
   };
 
+  const handleStrategyChange = (strategy) => {
+    setSelectedStrategy(strategy);
+  
+    // Inicializáljuk az új stratégia bemeneteit
+    const newInputs = {};
+    strategies[strategy].inputs.forEach((input) => {
+      newInputs[input] = inputs[input] || ""; // Megtartjuk a meglévő értékeket, ha vannak
+    });
+    setInputs(newInputs);
+  };
+
   const { contracts, riskAmount, phase, stop, valuePerPoint, account } = calculateContracts();
-  const tpMultiplier = phase === 1 ? 1.5 : 2;
+  const tpMultiplier =
+    selectedStrategy === "Expert"
+    ? parseFloat(inputs.targetRR || 1) // Az "Expert" stratégia esetén a targetRR-t használjuk
+    : phase === 1
+    ? 1.5
+    : 2;
   const targetPoints = stop * tpMultiplier;
   const expectedPoints = targetPoints;
 
   const expectedProfit =
-  phase === 1
+  selectedStrategy === "Expert"
+    ? contracts * stop * valuePerPoint * parseFloat(inputs.targetRR || 1) // Az "Expert" stratégia esetén a targetRR-t használjuk
+    : phase === 1
     ? expectedPoints * valuePerPoint * contracts // Első fázis: teljes pozíció 1.5R vagy 2R
     : (0.5 * stop * valuePerPoint * contracts) + // 50% lezárás 1R-nél
       (0.5 * targetPoints * valuePerPoint * contracts); // 50% lezárás 2R-nél
@@ -120,7 +153,10 @@ export default function RiskManagementApp() {
 
   const entry = 10000; // vagy számold dinamikusan
   const stopPrice = entry - stop;
-  const targetPrice = entry + targetPoints;
+  const targetPrice =
+    selectedStrategy === "Expert"
+    ? entry + stop * parseFloat(inputs.targetRR || 1) // Az "Expert" stratégia esetén a targetRR-t használjuk
+    : entry + targetPoints;
   const partialLevel = phase === 2 ? entry + stop : null; // 1R szint, csak phase 2 esetén
 
   const {
@@ -134,111 +170,170 @@ export default function RiskManagementApp() {
   const profitBarHeight = `${tpMultiplier * 20}%`; // Például: 1.5 -> 30%, 2.0 -> 40%
 
   return (
-    <div className="app-container">
-      <h1 className="app-title">Risk Management Calculator</h1>
-
-      <Label className="strategy-label">Select a Strategy </Label>
-      <Select onValueChange={setSelectedStrategy} value={selectedStrategy}>
-        <SelectTrigger className="strategy-select-trigger">
-          <SelectValue placeholder="Select a strategy" />
-        </SelectTrigger>
-        <SelectContent className="strategy-select-content">
-          {Object.entries(strategies).map(([key, strat]) => (
-            <SelectItem key={key} value={key} className="strategy-select-item">
-              {strat.name}
-            </SelectItem>
+    <div className="app-layout">
+      {/* Bal oldali panel */}
+      <div className="left-panel">
+        <h1 className="app-title">Risk Management Calculator</h1>
+  
+        <div className="input-group">
+          <Label className="strategy-label">Select a Strategy</Label>
+          <Select
+            options={Object.entries(strategies).map(([key, strat]) => ({
+              value: key,
+              label: strat.name,
+            }))}
+            value={{
+              value: selectedStrategy,
+              label: strategies[selectedStrategy].name,
+            }}
+            onChange={(selectedOption) => setSelectedStrategy(selectedOption.value)}
+            placeholder="Select a strategy"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: "#898c96",
+                borderColor: "#2e2e2e",
+                color: "white",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: "white",
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: "#898c96",
+                color: "white",
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isFocused ? "#728acc" : "#898c96",
+                color: "white",
+              }),
+            }}
+          />
+        </div>
+  
+        <Card className="strategy-card">
+          <CardContent className="strategy-description">
+            <p>{currentStrategy.description}</p>
+          </CardContent>
+        </Card>
+  
+        <div className="input-container">
+          {currentStrategy.inputs.map((input) => (
+            <div key={input} className="input-group">
+              <Label className="input-label">{input.replace(/([A-Z])/g, ' $1')}</Label>
+              <Input
+                type="number"
+                className="input-field"
+                value={inputs[input]}
+                onChange={(e) => setInputs({ ...inputs, [input]: e.target.value })}
+              />
+            </div>
           ))}
-        </SelectContent>
-      </Select>
-
-      <Card className="strategy-card">
-        <CardContent className="strategy-description">
-          <p>{currentStrategy.description}</p>
-        </CardContent>
-      </Card>
-
-      <div className="input-container">
-        {currentStrategy.inputs.map((input) => (
-          <div key={input} className="input-group">
-            <Label className="input-label">{input.replace(/([A-Z])/g, ' $1')}</Label>
+          <div className="input-group">
+            <Label className="input-label">Stop Loss Size (in points)</Label>
             <Input
               type="number"
               className="input-field"
-              value={inputs[input]}
-              onChange={(e) => setInputs({ ...inputs, [input]: e.target.value })}
+              value={inputs.stopSize}
+              onChange={(e) => setInputs({ ...inputs, stopSize: e.target.value })}
             />
           </div>
-        ))}
-        <div className="input-group">
-          <Label className="input-label">Stop Loss Size (in points)</Label>
-          <Input
-            type="number"
-            className="input-field"
-            value={inputs.stopSize}
-            onChange={(e) => setInputs({ ...inputs, stopSize: e.target.value })}
-          />
-        </div>
-        <div className="input-group">
-          <Label className="input-label">Instrument</Label>
-          <Select
-            onValueChange={(value) => setInputs({ ...inputs, asset: value })}
-            value={inputs.asset}
-          >
-            <SelectTrigger className="input-select-trigger">
-              <SelectValue placeholder="Select an instrument"/>
-            </SelectTrigger>
-            <SelectContent className="input-select-content">
-              {Object.keys(contractValuePerPoint).map((symbol) => (
-                <SelectItem key={symbol} value={symbol} className="input-select-item">
-                  {symbol}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <Card className="info-card">
-        <CardContent>
-          <p>Suggested Contract Quantity: {contracts} contracts</p>
-          <p>Expected Profit (if trade is successful): ${expectedProfit.toFixed(2)} ({expectedPoints.toFixed(2)} pts, {expectedPercent.toFixed(2)}%)</p>
-        </CardContent>
-      </Card>
-
-      <motion.div
-        className="position-visualization"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="target-label">
-          Target: {targetAmount.toFixed(2)} USD ({targetPercent.toFixed(2)}%) {targetPoints.toFixed(2)}
-        </div>
-
-        {showPartial && partialAmount && partialPercent && partialPoints && (
-          <div className="partial-line">
-            <span className="partial-text">
-              Partial: {parseFloat(partialAmount).toFixed(2)} USD ({parseFloat(partialPercent).toFixed(2)}%) {parseFloat(partialPoints).toFixed(2)}
-            </span>
+          <div className="input-group">
+            <Label className="input-label">Instrument</Label>
+            <Select
+              options={Object.keys(contractValuePerPoint).map((symbol) => ({
+                value: symbol,
+                label: symbol,
+              }))}
+              value={{
+                value: inputs.asset,
+                label: inputs.asset,
+              }}
+              onChange={(selectedOption) =>
+                setInputs({ ...inputs, asset: selectedOption.value })
+              }
+              placeholder="Select an instrument"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  backgroundColor: "#898c96",
+                  borderColor: "#2e2e2e",
+                  color: "white",
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  color: "white",
+                }),
+                menu: (base) => ({
+                  ...base,
+                  backgroundColor: "#898c96",
+                  color: "white",
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isFocused ? "#728acc" : "#898c96",
+                  color: "white",
+                }),
+              }}
+            />
           </div>
-        )}
-
-        <div
-          className="profit-bar"
-          style={{
-            "--profit-bar-height": profitBarHeight, // CSS változó beállítása
-          }}
-        ></div>
-
-        <div className="info-bar">
-          Expected Profit: {expectedProfit.toFixed(2)} USD ({expectedPercent.toFixed(2)}%)<br />
-          Qty: {contracts} | Risk/Reward Ratio: {tpMultiplier.toFixed(2)}
         </div>
-        <div className="loss-bar" />
-        <div className="stop-label">
-          Stop: {stopLossAmount.toFixed(2)} USD ({stopPercent.toFixed(2)}%) {stop.toFixed(2)}
-        </div>
-      </motion.div>
+  
+        <Card className="info-card">
+          <CardContent>
+            <p>Suggested Contract Quantity: {contracts} contracts</p>
+            <p>
+              Expected Profit (if trade is successful): ${expectedProfit.toFixed(2)} (
+              {expectedPoints.toFixed(2)} pts, {expectedPercent.toFixed(2)}%)
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+  
+      {/* Jobb oldali panel */}
+      <div className="right-panel">
+      <motion.div
+          className="position-visualization"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="target-label">
+            Target: {targetAmount.toFixed(2)} USD ({targetPercent.toFixed(2)}%){" "}
+            {targetPoints.toFixed(2)}
+          </div>
+  
+          {showPartial && partialAmount && partialPercent && partialPoints && (
+            <div className="partial-line">
+              <span className="partial-text">
+                Partial: {parseFloat(partialAmount).toFixed(2)} USD (
+                {parseFloat(partialPercent).toFixed(2)}%){" "}
+                {parseFloat(partialPoints).toFixed(2)}
+              </span>
+            </div>
+          )}
+  
+          <div
+            className="profit-bar"
+            style={{
+              "--profit-bar-height": profitBarHeight,
+            }}
+          ></div>
+  
+          <div className="info-bar">
+            Expected Profit: {expectedProfit.toFixed(2)} USD (
+            {expectedPercent.toFixed(2)}%)<br />
+            Qty: {contracts} | Risk/Reward Ratio: {tpMultiplier.toFixed(2)}
+          </div>
+          <div className="loss-bar" />
+          <div className="stop-label">
+            Stop: {stopLossAmount.toFixed(2)} USD ({stopPercent.toFixed(2)}%){" "}
+            {stop.toFixed(2)}
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

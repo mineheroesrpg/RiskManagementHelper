@@ -1,29 +1,57 @@
 /* App container */
 .app-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Középre igazítás vízszintesen */
-    justify-content: center; /* Középre igazítás függőlegesen */
     padding: 24px;
-    max-width: 768px;
-    margin: 0 auto;
     min-height: 100vh;
     background-color: #d9d9d9;
-    text-align: center; /* Szöveg középre igazítása */
+    text-align: left; /* Szöveg középre igazítása */
+    z-index: 9;
   }
+
+  /* App layout */
+.app-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #d9d9d9;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px; /* Távolság a panelek között */
+}
+
+/* Left panel */
+.left-panel {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Right panel */
+.right-panel {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100vh;
+}
   
   /* Title */
   .app-title {
+    text-align: center; /* Középre igazítás */
     font-size: 24px;
     font-weight: bold;
-    margin-bottom: 24px;
-    color: #2e2e2e;
+    margin-bottom: 16px;
   }
   
   /* Strategy selection */
   .strategy-label {
     margin-bottom: 8px;
     color: #2e2e2e;
+    z-index: 9;
   }
   
   .strategy-select-trigger {
@@ -32,6 +60,7 @@
     color: white;
     width: 100%; /* Szélesség igazítása */
     max-width: 300px; /* Maximális szélesség */
+    z-index: 9;
   }
   
   .strategy-select-content {
@@ -42,25 +71,28 @@
     max-height: 200px; /* Maximális magasság görgetéshez */
     overflow-y: auto; /* Görgetés engedélyezése */
     background-color: #898c96; /* Háttérszín */
-    color: white; /* Szövegszín */
+    color: rgb(0, 0, 0); /* Szövegszín */
     border: 1px solid #2e2e2e; /* Szegély */
     border-radius: 4px; /* Lekerekített sarkok */
-    z-index: 9999; /* Nagy z-index az előtérbe helyezéshez */
+    z-index: 9; /* Nagy z-index az előtérbe helyezéshez */
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
   }
   
   .strategy-select-item:hover {
     background-color: #728acc;
+    z-index: 9; /* Nagy z-index az előtérbe helyezéshez */
   }
   
   /* Strategy card */
   .strategy-card {
+    text-align: center;
     margin: 24px 0;
     background-color: rgb(255, 255, 255);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%; /* Szélesség igazítása */
+    width: 50%; /* Szélesség igazítása */
     max-width: 500px; /* Maximális szélesség */
+    z-index: 9;
   }
   
   /* Input container */
@@ -68,6 +100,7 @@
     margin-bottom: 24px;
     width: 100%; /* Szélesség igazítása */
     max-width: 500px; /* Maximális szélesség */
+    z-index: 9;
   }
   
   .input-group {
@@ -75,19 +108,22 @@
     display: flex;
     flex-direction: column; /* Elemek egymás alá helyezése */
     align-items: center; /* Középre igazítás */
+    z-index: 9;
   }
   
   .input-label {
     margin-bottom: 4px;
     color: #2e2e2e;
+    z-index: 9;
   }
   
   .input-field {
-    width: 100%;
+    width: 60%;
     max-width: 300px; /* Maximális szélesség */
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    z-index: 9;
   }
   
   /* Info card */
@@ -101,6 +137,7 @@
     text-align: center; /* Szöveg középre igazítása */
     border: 1px solid #080808;
     border-radius: 8px;
+    z-index: 9;
   }
   
   .info-card p {
@@ -110,15 +147,16 @@
 /* Container for the visualization */
 .position-visualization {
   position: relative;
-  border: 1px solid #ccc;
+  border: 5px solid #ccc;
   border-radius: 8px;
-  padding: 16px;
   background-color: #d9d9d9;
   width: 100%; /* Szélesség igazítása */
-  max-width: 500px; /* Maximális szélesség */
+  max-width: 400px; /* Maximális szélesség */
   text-align: center; /* Szöveg középre igazítása */
-  height: 400px; /* Fix magasság beállítása */
-  overflow: visible; /* Biztosítja, hogy a tartalom ne lógjon ki */
+  height: 600px; /* Fix magasság beállítása */
+  overflow: auto;
+  z-index: 1;
+  margin: 0 auto;
 }
   
   /* Target label */
@@ -134,7 +172,7 @@
     font-size: 10px;
     font-weight: bold;
     text-align: center;
-    z-index: 2; /* Előtérbe helyezés */
+    z-index: 4; /* Előtérbe helyezés */
   }
   
   /* Partial line */
@@ -198,7 +236,7 @@
   /* Loss bar */
   .loss-bar {
     position: absolute;
-    bottom: 10%;
+    bottom: 20%;
     left: 50%;
     transform: translateX(-50%);
     width: 200px;
@@ -229,10 +267,10 @@
 /* Loss bar animáció */
 @keyframes growLossBar {
     from {
-      height: 0;
+      height: 0%;
     }
     to {
-      height: 30%; /* Végső magasság */
+      height: 20%; /* Végső magasság */
     }
   }
 
@@ -265,3 +303,4 @@
     opacity: 0.6;
   }
 }
+
