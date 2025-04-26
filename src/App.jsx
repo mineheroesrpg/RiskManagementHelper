@@ -173,7 +173,7 @@ export default function RiskManagementApp() {
     <div className="app-layout">
       {/* Bal oldali panel */}
       <div className="left-panel">
-        <h1 className="app-title">Risk Management Calculator</h1>
+        <h1 className="app-title">Risk Management Helper</h1>
   
         <div className="input-group">
           <Label className="strategy-label">Select a Strategy</Label>
