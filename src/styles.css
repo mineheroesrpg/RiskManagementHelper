@@ -136,7 +136,7 @@
     max-width: 500px; /* Maximális szélesség */
     text-align: center; /* Szöveg középre igazítása */
     border: 1px solid #080808;
-    border-radius: 8px;
+    border-radius: 0px;
     z-index: 9;
   }
   
